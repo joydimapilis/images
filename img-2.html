@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Global Voice</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #F2EBD9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .scene {
+      position: relative;
+      width: 900px;
+      height: 490px;
+      overflow: hidden;
+      background: #F2EBD9;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+    }
+
+    /* Coloured corner/anchor squares */
+    .anchor {
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border-radius: 2px;
+      z-index: 20;
+    }
+
+    /* Brand logotype mark */
+    .brand-mark {
+      position: absolute;
+      z-index: 20;
+      transform: translate(-50%, -50%);
+      /* Bold condensed letterform */
+      font-family: 'Impact', 'Arial Black', 'Helvetica Neue', sans-serif;
+      font-size: 66px;
+      font-weight: 900;
+      color: #0e0e0e;
+      line-height: 0.88;
+      letter-spacing: -1px;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="scene" id="scene">
+    <canvas id="globe" width="900" height="490"></canvas>
+
+    <!-- ── Six anchor / reference squares ─────────────── -->
+    <!-- Inner top pair -->
+    <span class="anchor" style="background:#E04040; left:318px; top:134px;"></span>
+    <span class="anchor" style="background:#E87A20; left:519px; top:134px;"></span>
+    <!-- Mid-width pair -->
+    <span class="anchor" style="background:#D4A018; left:202px; top:222px;"></span>
+    <span class="anchor" style="background:#7B2FBE; left:635px; top:222px;"></span>
+    <!-- Outer bottom pair (partially cropped by overflow:hidden) -->
+    <span class="anchor" style="background:#2B6DE8; left:212px; top:447px;"></span>
+    <span class="anchor" style="background:#1BA830; left:680px; top:447px;"></span>
+
+    <!-- ── Brand mark ──────────────────────────────────── -->
+    <div class="brand-mark" style="left:450px; top:300px;">b</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('globe');
+    const ctx    = canvas.getContext('2d');
+    const W = 900, H = 490;
+
+    // ── Globe geometry ─────────────────────────────────
+    // Globe center positioned so its top (~North Pole) sits near
+    // the canvas top and its bottom extends ~350 px below the frame.
+    const cx = 450;   // horizontal centre
+    const cy = 441;   // vertical centre (below canvas bottom → cropped look)
+    const R  = 416;   // sphere radius in px
+
+    // Viewing elevation: 6° above the equatorial plane gives the
+    // subtle curvature seen on the latitude arcs.
+    const elev  = 6 * Math.PI / 180;
+    const cosEl = Math.cos(elev);
+    const sinEl = Math.sin(elev);
+
+    // ── Orthographic projection ────────────────────────
+    // Viewer at (+X direction), tilted `elev` above equatorial plane.
+    //   screen_x = cx + R · y3
+    //   screen_y = cy − R · (z3·cosEl − x3·sinEl)
+    // where (x3,y3,z3) are unit-sphere Cartesian coords.
+    function project(latDeg, lonDeg) {
+      const φ = latDeg * Math.PI / 180;
+      const λ = lonDeg * Math.PI / 180;
+      const x3 = Math.cos(φ) * Math.cos(λ);
+      const y3 = Math.cos(φ) * Math.sin(λ);
+      const z3 = Math.sin(φ);
+      return {
+        x: cx + R * y3,
+        y: cy - R * (z3 * cosEl - x3 * sinEl)
+      };
+    }
+
+    // ── 1. Page background ─────────────────────────────
+    ctx.fillStyle = '#F2EBD9';
+    ctx.fillRect(0, 0, W, H);
+
+    // ── 2. Globe interior fill ─────────────────────────
+    // Very subtle warm beige – just perceptibly different from page bg
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fillStyle = '#EDE5CF';
+    ctx.fill();
+
+    // ── 3. Grid lines ──────────────────────────────────
+    ctx.strokeStyle = '#C8B690';
+    ctx.lineWidth   = 0.85;
+
+    // Latitude parallels – each is a true horizontal ellipse:
+    //   centre_y = cy − R·sin(φ)·cosEl
+    //   rx = R·cos(φ),  ry = R·cos(φ)·sinEl
+    for (let lat = -80; lat <= 80; lat += 10) {
+      const φ       = lat * Math.PI / 180;
+      const centreY = cy - R * Math.sin(φ) * cosEl;
+      const rx      = R * Math.cos(φ);
+      const ry      = R * Math.cos(φ) * sinEl;
+      if (rx < 2) continue;
+      ctx.beginPath();
+      ctx.ellipse(cx, centreY, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Longitude meridians – parametric arcs from S-pole to N-pole
+    for (let lon = 0; lon < 360; lon += 18) {
+      ctx.beginPath();
+      for (let lat = -90; lat <= 90; lat += 1) {
+        const { x, y } = project(lat, lon);
+        lat === -90 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // ── 4. Globe outline circle ────────────────────────
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.strokeStyle = '#C2AF88';
+    ctx.lineWidth   = 0.9;
+    ctx.stroke();
+  </script>
+
+  <!--
+  ════════════════════════════════════════════════════════════════════
+  REVERSE-ENGINEERED DESIGN PROMPT
+  ════════════════════════════════════════════════════════════════════
+
+  Create a minimal, flat illustration of a wireframe globe on a warm
+  cream background, partially cropped at the bottom so only the top
+  ~56% of the sphere is visible.
+
+  ── Canvas ──────────────────────────────────────────────────────────
+  • Background colour: #F2EBD9 (warm parchment / off-white cream)
+  • Canvas aspect ratio: ~1.84 : 1  (e.g. 900 × 490 px)
+  • overflow: hidden on the container
+
+  ── Globe ───────────────────────────────────────────────────────────
+  • The globe is centered horizontally and positioned so its top arc
+    ("North Pole") appears ~4–6% from the top of the canvas.
+  • The globe center is placed ~88–90% down the canvas height, causing
+    the lower ~44% of the sphere to be cropped by the frame.
+  • Globe interior fill:   #EDE5CF  (warm beige, barely darker than bg)
+  • Grid line colour:      #C8B690  (warm tan / aged parchment tone)
+  • Grid line weight:      0.85 px
+  • Globe outline circle:  #C2AF88, 0.9 px stroke
+  • Projection: orthographic, viewing from the positive-X equatorial
+    direction, tilted ~6° above the equatorial plane.
+
+  ── Globe Grid ──────────────────────────────────────────────────────
+  • Latitude parallels every 10° from −80° to +80° (17 lines drawn;
+    ~9 visible within the canvas).
+    Each parallel is a true horizontal ellipse:
+      centre_y = globe_cy − R · sin(lat) · cos(elev)
+      rx = R · cos(lat)
+      ry = R · cos(lat) · sin(elev)
+  • Longitude meridians every 18° (20 half-arcs = 10 great circles).
+    Drawn parametrically from S-pole to N-pole, 1° increments.
+
+  ── Anchor Squares ──────────────────────────────────────────────────
+  Six small filled squares (13×13 px, border-radius 2px) placed at
+  specific reference positions on the composition. Colours and approx.
+  canvas coordinates (for a 900×490 canvas):
+
+    coral red   #E04040  — top-center-left  (~35%, 27%)
+    burnt orange #E87A20 — top-center-right (~58%, 27%)
+    amber/gold  #D4A018  — mid-left         (~23%, 45%)
+    violet      #7B2FBE  — mid-right        (~71%, 45%)
+    electric blue #2B6DE8 — lower-left      (~24%, 91%)
+    emerald green #1BA830 — lower-right     (~76%, 91%)
+
+  The top pair defines a narrow inner reference box around the globe's
+  upper torso. The mid pair defines a wider reference box at the
+  sphere's widest visible latitude band. The bottom pair defines the
+  outermost extent and is partially cropped by the container overflow.
+
+  ── Brand / Logo Mark ───────────────────────────────────────────────
+  • A single bold, condensed black letterform ("b" or brand glyph)
+    centered horizontally at approx. (50%, 61%) of the canvas.
+  • Colour: #0e0e0e (near-black)
+  • Font style: Impact or Arial Black, 900 weight, ~66px, line-height 0.88
+  • No shadow, no outline — plain solid fill on the warm globe surface.
+
+  ── Colour Palette ──────────────────────────────────────────────────
+  Page background    #F2EBD9
+  Globe fill         #EDE5CF
+  Grid lines         #C8B690
+  Globe outline      #C2AF88
+  Logo mark          #0E0E0E
+  Anchor 1 (red)     #E04040
+  Anchor 2 (orange)  #E87A20
+  Anchor 3 (gold)    #D4A018
+  Anchor 4 (violet)  #7B2FBE
+  Anchor 5 (blue)    #2B6DE8
+  Anchor 6 (green)   #1BA830
+
+  ── Typography ──────────────────────────────────────────────────────
+  Only the brand mark uses type. No labels, captions, or other text.
+  Font: Impact → Arial Black → Helvetica Neue, condensed, 900 weight.
+
+  ── Visual Style ────────────────────────────────────────────────────
+  Flat / minimal illustration — zero drop shadows, zero gradients.
+  Warm monochromatic palette with small multi-coloured accent dots.
+  Clean editorial / SaaS-product-marketing aesthetic.
+  Globe evokes "global reach" or "international voice" concept.
+  The cropped bottom creates a sense of scale and grandeur.
+  ════════════════════════════════════════════════════════════════════
+  -->
+
+</body>
+</html>
