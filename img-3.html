@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recreated UI - img-3</title>
+  <style>
+    :root {
+      --canvas: #fbf7ea;
+      --panel: #fbf8ec;
+      --rail: #f1ecdc;
+      --line: #c4c0aa;
+      --muted: #cec8b0;
+      --muted-dark: #bcb7a0;
+      --ink: #7d776c;
+      --blue: #205dac;
+      --amber: #f2a406;
+      --red: #b50e17;
+      --olive: #b58c2d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #171713;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .viewport {
+      width: min(100vw, calc(100vh * 2516 / 1364));
+      aspect-ratio: 2516 / 1364;
+      position: relative;
+      overflow: hidden;
+      background: var(--canvas);
+      border: 2px solid #25241f;
+      border-radius: 6px;
+    }
+
+    .stage {
+      position: absolute;
+      inset: 0;
+      width: 2516px;
+      height: 1364px;
+      transform: scale(var(--scale, 1));
+      transform-origin: top left;
+    }
+
+    .rail {
+      position: absolute;
+      left: 735px;
+      top: 483px;
+      width: 1017px;
+      height: 783px;
+      background: var(--rail);
+    }
+
+    .pipe {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .pipe.blue {
+      left: 314px;
+      top: 671px;
+      width: 515px;
+      height: 820px;
+      border-top: 6px solid var(--blue);
+      border-left: 6px solid var(--blue);
+      border-top-left-radius: 118px;
+    }
+
+    .pipe.amber-top {
+      right: 510px;
+      top: -8px;
+      width: 518px;
+      height: 360px;
+      border-right: 6px solid var(--amber);
+      border-bottom: 6px solid var(--amber);
+      border-bottom-right-radius: 118px;
+    }
+
+    .pipe.red {
+      right: 314px;
+      top: -2px;
+      width: 356px;
+      height: 985px;
+      border-right: 6px solid var(--red);
+      border-bottom: 6px solid var(--red);
+      border-bottom-right-radius: 116px;
+    }
+
+    .pipe.olive {
+      left: 535px;
+      bottom: -140px;
+      width: 350px;
+      height: 210px;
+      border-top: 5px solid var(--olive);
+      border-left: 5px solid var(--olive);
+      border-top-left-radius: 105px;
+    }
+
+    .card {
+      position: absolute;
+      left: 631px;
+      width: 1222px;
+      height: 260px;
+      background: var(--panel);
+      border: 4px solid var(--line);
+      border-radius: 5px;
+      box-shadow: 0 3px 0 rgba(128, 122, 103, 0.14);
+    }
+
+    .card.one { top: 226px; }
+    .card.two { top: 538px; }
+    .card.three { top: 851px; }
+    .card.four { top: 1163px; }
+
+    .swatches {
+      position: absolute;
+      display: flex;
+      gap: 18px;
+      left: 50px;
+      top: 53px;
+    }
+
+    .swatch {
+      width: 50px;
+      height: 50px;
+      background: var(--muted);
+    }
+
+    .swatch.soft { background: #d3cdb7; }
+    .swatch.dark { background: var(--muted-dark); }
+    .swatch.blue {
+      background: var(--blue);
+      border-radius: 4px;
+    }
+    .swatch.amber {
+      background: var(--amber);
+      border-radius: 4px;
+    }
+    .swatch.red {
+      background: var(--red);
+      border-radius: 4px;
+    }
+
+    .bar {
+      position: absolute;
+      right: 36px;
+      bottom: 43px;
+      width: 247px;
+      height: 50px;
+      background: var(--muted);
+    }
+
+    .card.one .bar {
+      top: 163px;
+      bottom: auto;
+    }
+
+    .brand {
+      position: absolute;
+      right: 34px;
+      top: 47px;
+      color: var(--ink);
+      font-size: 53px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -2.5px;
+    }
+
+    .brand sup {
+      position: relative;
+      top: -18px;
+      margin-left: 4px;
+      font-size: 18px;
+      letter-spacing: 0;
+      font-weight: 700;
+    }
+
+    .prompt {
+      display: none;
+    }
+
+  </style>
+</head>
+<body>
+  <main class="viewport" aria-label="Minimal stacked workflow diagram recreation">
+    <div class="stage">
+      <div class="pipe amber-top"></div>
+      <div class="pipe red"></div>
+      <div class="pipe blue"></div>
+      <div class="pipe olive"></div>
+      <div class="rail"></div>
+
+      <section class="card one" aria-label="Top step">
+        <div class="swatches">
+          <span class="swatch soft"></span>
+          <span class="swatch blue"></span>
+          <span class="swatch soft"></span>
+          <span class="swatch soft"></span>
+        </div>
+        <div class="bar"></div>
+      </section>
+
+      <section class="card two" aria-label="Brand step">
+        <div class="swatches">
+          <span class="swatch dark"></span>
+          <span class="swatch dark"></span>
+          <span class="swatch dark"></span>
+          <span class="swatch amber"></span>
+        </div>
+        <div class="brand">Bland<sup>®</sup></div>
+        <div class="bar"></div>
+      </section>
+
+      <section class="card three" aria-label="Alert step">
+        <div class="swatches">
+          <span class="swatch red"></span>
+          <span class="swatch dark"></span>
+          <span class="swatch dark"></span>
+          <span class="swatch dark"></span>
+        </div>
+        <div class="bar"></div>
+      </section>
+
+      <section class="card four" aria-label="Lower step">
+        <div class="swatches">
+          <span class="swatch soft"></span>
+          <span class="swatch soft"></span>
+          <span class="swatch blue"></span>
+          <span class="swatch soft"></span>
+        </div>
+        <div class="bar"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const viewport = document.querySelector(".viewport");
+
+    function fitArtboard() {
+      const scale = Math.min(viewport.clientWidth / 2516, viewport.clientHeight / 1364);
+      viewport.style.setProperty("--scale", scale);
+    }
+
+    window.addEventListener("resize", fitArtboard);
+    fitArtboard();
+  </script>
+
+  <section class="prompt" aria-hidden="true">
+    Reverse-engineered design prompt:
+    Create a minimalist flat editorial UI illustration on a 2516 x 1364 px artboard. The background is a warm ivory/cream color (#fbf7ea) with a very thin dark outer border (#25241f) and a subtle 6 px viewport corner radius. In the center, stack four large horizontal process cards, each 1222 px wide and 260 px high, aligned at x=631 px. Place them at y=226, 538, 851, and 1163 px so the lowest card is partially cropped by the bottom edge. Cards use a nearly identical warm off-white fill (#fbf8ec), a 4 px muted khaki outline (#c4c0aa), a 5 px radius, and a very soft downward shadow.
+
+    Behind the cards, add a vertical pale beige rail (#f1ecdc) positioned at x=735 px, y=483 px, width 1017 px, height 783 px, visible only in the gaps between the cards. Add thick routed connector lines outside and behind the cards: a blue line (#205dac) on the left begins below the middle cards, curves through a 118 px top-left radius, then continues upward/right with 6 px stroke; an amber line (#f2a406) drops from the top near the right side and curves leftward with a rounded 118 px bottom-right corner; a red line (#b50e17) runs down the far right side and curves left along the lower middle with a 116 px rounded bottom-right corner; add a partial olive line (#b58c2d) emerging from the lower left edge with a rounded top-left bend. The style should be clean, geometric, flat, and diagrammatic rather than skeuomorphic.
+
+    Inside each card, place four small square swatches near the upper-left: each square is 50 x 50 px, spaced 18 px apart, with the group at left 50 px and top 53 px. Default swatches are muted beige (#cec8b0 or #bcb7a0). Highlight one square per row with saturated status colors: top card second swatch is blue (#205dac), second card fourth swatch is amber (#f2a406), third card first swatch is red (#b50e17), fourth card third swatch is blue (#205dac). Colored swatches have a tiny 4 px radius while beige swatches are square. Each card also has a muted beige horizontal rectangle on the lower-right: 247 x 50 px, right 36 px, bottom 43 px; on the top card place it at top 163 px instead of bottom aligned.
+
+    On the second card, add a wordmark reading "Bland®" on the right side above the beige bar. Use Arial/Helvetica or a similar bold grotesk sans-serif, color #7d776c, weight 800, font size 53 px, line height 1, slight tight tracking around -2.5 px, with the registered symbol as an 18 px superscript. Keep typography sparse; no other visible labels. Use no gradients, no glass, no material shadows, and no decorative texture. The composition should feel like a cropped systems diagram or workflow map: oversized negative space, precision alignment, muted neutral palette, and small saturated accent markers.
+
+    Optional interaction: make the artboard responsive by scaling the fixed 2516 x 1364 layout proportionally to fit the viewport while preserving the original aspect ratio. No animation is required.
+  </section>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recreated Illustration - img-6</title>
+  <style>
+    :root {
+      --scale: 1;
+      --bg: #f4f2ff;
+      --outline: #4b3bd8;
+      --side: #b8a8ff;
+      --top: #f6f3ff;
+      --thin: #a9a3c7;
+      --dot: #8475e4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #171713;
+    }
+
+    .viewport {
+      width: min(100vw, calc(100vh * 3200 / 2261));
+      aspect-ratio: 3200 / 2261;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .stage {
+      width: 3200px;
+      height: 2261px;
+      transform: scale(var(--scale));
+      transform-origin: top left;
+    }
+
+    svg { display: block; width: 3200px; height: 2261px; }
+  </style>
+</head>
+<body>
+  <main class="viewport" aria-label="Floating isometric data cards illustration">
+    <div class="stage">
+      <svg id="art" viewBox="0 0 3200 2261" role="img" aria-label="Pale purple floating isometric cards with signal, text, waves, and dot patterns">
+        <defs>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+            <feDropShadow dx="0" dy="34" stdDeviation="26" flood-color="#5e4ddb" flood-opacity=".22"/>
+          </filter>
+        </defs>
+        <rect width="3200" height="2261" fill="#f4f2ff"/>
+      </svg>
+    </div>
+  </main>
+
+  <script>
+    const viewport = document.querySelector(".viewport");
+    const svg = document.getElementById("art");
+    const defs = svg.querySelector("defs");
+    const NS = "http://www.w3.org/2000/svg";
+    let tileCount = 0;
+
+    function el(name, attrs = {}, parent = svg) {
+      const node = document.createElementNS(NS, name);
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+      parent.appendChild(node);
+      return node;
+    }
+
+    function tile(x, y, w, h, depth, pattern) {
+      const g = el("g", { transform: `translate(${x} ${y})`, filter: "url(#shadow)" });
+      const p = `${w / 2},0 ${w},${h / 2} ${w / 2},${h} 0,${h / 2}`;
+      const clipId = `tile-face-${++tileCount}`;
+      const clip = el("clipPath", { id: clipId }, defs);
+      el("polygon", { points: p }, clip);
+
+      el("polygon", { points: `0,${h / 2} ${w / 2},${h} ${w / 2},${h + depth} 0,${h / 2 + depth}`, fill: "#b8a8ff", stroke: "#4b3bd8", "stroke-width": 8, "stroke-linejoin": "round" }, g);
+      el("polygon", { points: `${w / 2},${h} ${w},${h / 2} ${w},${h / 2 + depth} ${w / 2},${h + depth}`, fill: "#a999f2", stroke: "#4b3bd8", "stroke-width": 8, "stroke-linejoin": "round" }, g);
+      el("polygon", { points: p, fill: "#f6f3ff" }, g);
+      const patternLayer = el("g", { "clip-path": `url(#${clipId})` }, g);
+      pattern(patternLayer, w, h);
+      el("polygon", { points: p, fill: "none", stroke: "#4b3bd8", "stroke-width": 8, "stroke-linejoin": "round" }, g);
+      return g;
+    }
+
+    function linePattern(g, w, h) {
+      const group = el("g", {}, g);
+      const lineCount = 21;
+      const leftTop = { x: w * .07, y: h * .47 };
+      const leftBottom = { x: w * .43, y: h * .83 };
+      const lineVector = { x: w * .52, y: -h * .28 };
+
+      for (let i = 0; i < lineCount; i++) {
+        const t = i / (lineCount - 1);
+        const edgeInset = Math.abs(t - .5) * .018;
+        const left = {
+          x: leftTop.x + (leftBottom.x - leftTop.x) * t + w * edgeInset,
+          y: leftTop.y + (leftBottom.y - leftTop.y) * t + h * edgeInset * .45
+        };
+        const right = {
+          x: left.x + lineVector.x - w * edgeInset * 2.2,
+          y: left.y + lineVector.y - h * edgeInset * .8
+        };
+        el("line", {
+          x1: left.x, y1: left.y,
+          x2: right.x, y2: right.y,
+          stroke: i === 0 ? "#3a326c" : "#aaa4c7",
+          "stroke-width": i === 0 ? 4.2 : 3.1,
+          "stroke-linecap": "round",
+          opacity: i === 0 ? .86 : .56
+        }, group);
+      }
+    }
+
+    function wavePattern(g, w, h) {
+      const group = el("g", { transform: `translate(${w * .05} ${h * .06})` }, g);
+      for (let r = 42; r <= 420; r += 22) {
+        el("path", {
+          d: `M ${w * .25 + r * .34} ${h * .60 + r * .18} C ${w * .19 + r * .40} ${h * .48 + r * .05}, ${w * .21 + r * .57} ${h * .34 - r * .08}, ${w * .34 + r * .74} ${h * .24 - r * .16}`,
+          fill: "none",
+          stroke: "#8e82df",
+          "stroke-width": 3,
+          opacity: Math.max(.08, .42 - r / 1250)
+        }, group);
+      }
+    }
+
+    function dotPattern(g, w, h) {
+      const points = [];
+      for (let i = 0; i < 145; i++) {
+        const a = i * 2.399;
+        const r = 18 * Math.sqrt(i);
+        points.push([w / 2 + Math.cos(a) * r * 2.1, h / 2 + Math.sin(a) * r * .82, 7 + (i % 7) * 2.4]);
+      }
+      points.forEach(([x, y, r], i) => el("circle", { cx: x, cy: y, r, fill: i % 5 === 0 ? "#7564dd" : "#a799ef", opacity: i % 4 === 0 ? .82 : .55 }, g));
+    }
+
+    function pulsePattern(g, w, h) {
+      const group = el("g", { transform: `translate(${w * .02} ${-h * .03})` }, g);
+      const pts = [
+        [w * .25, h * .68], [w * .41, h * .58], [w * .37, h * .51],
+        [w * .52, h * .61], [w * .47, h * .48], [w * .63, h * .39],
+        [w * .76, h * .49], [w * .68, h * .34], [w * .80, h * .40]
+      ];
+      el("polyline", { points: pts.map(p => p.join(",")).join(" "), fill: "none", stroke: "#4d3fd6", "stroke-width": 4, "stroke-linejoin": "round" }, group);
+      el("polyline", { points: pts.map(([x, y]) => `${x - 112},${y + 70}`).join(" "), fill: "none", stroke: "#4d3fd6", "stroke-width": 4, "stroke-linejoin": "round" }, group);
+    }
+
+    tile(1095, 260, 1420, 660, 110, linePattern);
+    tile(245, 730, 1365, 700, 112, pulsePattern);
+    tile(1785, 805, 1385, 700, 112, wavePattern);
+    tile(948, 1300, 1370, 705, 114, dotPattern);
+
+    function fitArtboard() {
+      viewport.style.setProperty("--scale", Math.min(viewport.clientWidth / 3200, viewport.clientHeight / 2261));
+    }
+    addEventListener("resize", fitArtboard);
+    fitArtboard();
+  </script>
+</body>
+</html>

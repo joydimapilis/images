@@ -5,536 +5,671 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Image Recreation Gallery</title>
   <style>
-    /* ─── Reset ─────────────────────────────────────── */
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&display=swap');
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ─── Page shell ─────────────────────────────────── */
-    body {
-      background: #111318;
-      font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-      color: #E2E4EA;
-      min-height: 100vh;
-      padding: 48px 40px;
+    :root {
+      --bg: #0f0e0b;
+      --surface: #1a1916;
+      --border: #2e2c27;
+      --cream: #f2ead8;
+      --muted: #6b6860;
+      --accent: #c9a84c;
+      --text: #e8e2d4;
     }
 
-    h1 {
-      font-size: 13px;
-      font-weight: 600;
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', 'Courier New', monospace;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 56px 60px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+    }
+
+    header h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 42px;
+      font-weight: 400;
+      color: var(--cream);
+      letter-spacing: -0.5px;
+    }
+
+    header span {
+      font-size: 12px;
+      color: var(--muted);
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #6B7280;
-      margin-bottom: 40px;
     }
 
-    /* ─── Entry row ──────────────────────────────────── */
+    /* ── Gallery entries ── */
+    .gallery {
+      padding: 0;
+    }
+
     .entry {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0;
-      border: 1px solid #1E2128;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 48px;
+      height: 580px;
+      border-bottom: 1px solid var(--border);
     }
 
-    /* Entry label strip */
-    .entry__header {
-      grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 22px;
-      background: #16191F;
-      border-bottom: 1px solid #1E2128;
+    .entry:nth-child(even) {
+      direction: rtl;
     }
-    .entry__index {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: #4B5263;
-      text-transform: uppercase;
-    }
-    .entry__title {
-      font-size: 13px;
-      font-weight: 500;
-      color: #9CA3AF;
+    .entry:nth-child(even) > * {
+      direction: ltr;
     }
 
-    /* ─── Preview pane ───────────────────────────────── */
+    /* Preview pane */
     .preview {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 48px 32px;
-      background: #F2EBD9;
-      border-right: 1px solid #1E2128;
-      min-height: 380px;
+      position: relative;
+      background: #141311;
+      overflow: hidden;
+      height: 100%;
     }
 
-    /* ─── Prompt pane ────────────────────────────────── */
-    .prompt-pane {
-      display: flex;
-      flex-direction: column;
-      background: #13161C;
+    .preview iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      pointer-events: none;
     }
-    .prompt-pane__label {
-      padding: 14px 22px 12px;
-      font-size: 10px;
-      font-weight: 700;
+
+    .entry-num {
+      position: absolute;
+      top: 20px;
+      left: 24px;
+      font-size: 11px;
+      color: var(--muted);
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: #4B5263;
-      border-bottom: 1px solid #1E2128;
+      z-index: 10;
+    }
+
+    /* Prompt pane */
+    .prompt-pane {
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .entry:nth-child(even) .prompt-pane {
+      border-left: none;
+      border-right: 1px solid var(--border);
+    }
+
+    .prompt-header {
+      padding: 28px 36px 20px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 7px;
+      justify-content: space-between;
     }
-    .prompt-pane__label svg {
-      opacity: .5;
-    }
-    .prompt-pane__copy {
-      margin-left: auto;
-      cursor: pointer;
-      background: #1E2128;
-      border: 1px solid #2A2F3A;
-      border-radius: 5px;
-      color: #6B7280;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      transition: background 120ms, color 120ms;
-    }
-    .prompt-pane__copy:hover { background: #262B35; color: #C0C7D4; }
-    .prompt-pane__copy.copied { color: #4ADE80; border-color: #4ADE8040; }
 
-    .prompt-pane__body {
-      padding: 22px;
-      overflow-y: auto;
-      flex: 1;
-      max-height: 480px;
+    .prompt-header h2 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--cream);
     }
-    .prompt-pane__body pre {
+
+    .tag {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 4px 10px;
+      border-radius: 2px;
+      opacity: 0.7;
+    }
+
+    .prompt-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 28px 36px;
+      min-height: 0;
+    }
+
+    .prompt-body::-webkit-scrollbar { width: 4px; }
+    .prompt-body::-webkit-scrollbar-track { background: transparent; }
+    .prompt-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .prompt-body pre {
+      font-family: 'DM Mono', 'Courier New', monospace;
+      font-size: 12.5px;
+      line-height: 1.75;
+      color: #b8b2a4;
       white-space: pre-wrap;
       word-break: break-word;
-      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-      font-size: 12px;
-      line-height: 1.75;
-      color: #A8B0C0;
     }
-    /* subtle syntax tinting */
-    .prompt-pane__body pre .h  { color: #E2E4EA; font-weight: 600; } /* headings */
-    .prompt-pane__body pre .v  { color: #7DD3FC; }                    /* hex values */
-    .prompt-pane__body pre .k  { color: #C084FC; }                    /* keywords */
-    .prompt-pane__body pre .n  { color: #86EFAC; }                    /* numbers */
 
-    /* ─────────────────────────────────────────────────── */
-    /*  IMAGE 1 — Custom Models                            */
-    /* ─────────────────────────────────────────────────── */
-
-    /* Frame & corner anchors */
-    .frame {
-      position: relative;
-      width: 540px;
-      padding: 50px 0;
+    /* Section headings inside the prompt text */
+    .prompt-body pre .section {
+      color: var(--accent);
+      font-weight: 500;
     }
-    .corner {
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      border-radius: 2px;
-    }
-    .corner--tl { top: 30px;    left: -5px;  background: #E04040; }
-    .corner--tr { top: 30px;    right: -5px; background: #E87A20; }
-    .corner--bl { bottom: 30px; left: -5px;  background: #6B2DB8; }
-    .corner--br { bottom: 30px; right: -5px; background: #D49020; }
 
-    /* Card stack */
-    .stack { display: flex; flex-direction: column; gap: 16px; }
-
-    .card {
+    /* ── Footer ── */
+    footer {
+      padding: 32px 60px;
+      border-top: 1px solid var(--border);
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 13px;
-      border-radius: 6px;
-      padding: 22px 36px;
-      border: 1.5px solid #DDD5C0;
-      background: #F5EFE2;
-      transition: background 150ms, border-color 150ms;
-      cursor: default;
-    }
-    .card:hover { background: #EAE0CE; border-color: #C8BFA8; }
-
-    .card--featured {
-      background: #EDE4CC;
-      border-color: #D8CDB4;
-      padding: 30px 36px;
-    }
-    .card--featured:hover { background: #E4D8BA; border-color: #C4B89E; }
-
-    .card__icon { flex-shrink: 0; color: #5A5347; }
-    .card__icon svg { display: block; width: 26px; height: 26px; }
-    .card--featured .card__icon svg { width: 30px; height: 30px; }
-
-    .card__label {
-      font-size: 19px;
-      font-weight: 600;
-      color: #4A4440;
-      letter-spacing: -0.01em;
-    }
-    .card--featured .card__label { font-size: 23px; }
-
-    /* ─────────────────────────────────────────────────── */
-    /*  IMAGE 2 — Global Voice                             */
-    /* ─────────────────────────────────────────────────── */
-    .globe-scene {
-      position: relative;
-      width: 560px;
-      height: 310px;
-      overflow: hidden;
-      background: #F2EBD9;
-      flex-shrink: 0;
-    }
-    .globe-scene canvas {
-      position: absolute;
-      top: 0; left: 0;
-      display: block;
-    }
-    .globe-anchor {
-      position: absolute;
-      width: 9px;
-      height: 9px;
-      border-radius: 1.5px;
-      z-index: 20;
-    }
-    .globe-mark {
-      position: absolute;
-      z-index: 20;
-      transform: translate(-50%, -50%);
-      font-family: 'Impact', 'Arial Black', 'Helvetica Neue', sans-serif;
-      font-size: 42px;
-      font-weight: 900;
-      color: #0e0e0e;
-      line-height: 0.88;
-      letter-spacing: -1px;
-      user-select: none;
+      justify-content: space-between;
     }
 
+    footer p {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .entry {
+        grid-template-columns: 1fr;
+        height: auto;
+        direction: ltr !important;
+      }
+      .entry > * { direction: ltr !important; }
+      .preview { height: 340px; }
+      .prompt-pane { height: 400px; }
+      .entry:nth-child(even) .prompt-pane {
+        border-left: none;
+        border-right: none;
+        border-top: 1px solid var(--border);
+      }
+      .prompt-pane {
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+      header { padding: 32px 24px 24px; flex-direction: column; gap: 8px; }
+      footer { padding: 24px; }
+    }
   </style>
 </head>
 <body>
 
-  <h1>Image Recreation Gallery</h1>
+  <header>
+    <h1>Image Recreation Gallery</h1>
+    <span>6 Recreations &amp; Reverse-Engineered Prompts</span>
+  </header>
 
-  <!-- ═══════ ENTRY 1 ══════════════════════════════════════════ -->
-  <div class="entry">
-    <div class="entry__header">
-      <span class="entry__index">01</span>
-      <span class="entry__title">Custom Models — AI model type selector</span>
-    </div>
+  <div class="gallery">
 
-    <!-- Left: recreation -->
-    <div class="preview">
-      <div class="frame">
-        <span class="corner corner--tl"></span>
-        <span class="corner corner--tr"></span>
-        <span class="corner corner--bl"></span>
-        <span class="corner corner--br"></span>
+    <!-- ── Entry 1 ── -->
+    <div class="entry">
+      <div class="preview">
+        <span class="entry-num">01 / 06</span>
+        <iframe src="img-1.html" title="Custom Models recreation" loading="lazy"></iframe>
+      </div>
+      <div class="prompt-pane">
+        <div class="prompt-header">
+          <h2>Custom Models</h2>
+          <span class="tag">Prompt</span>
+        </div>
+        <div class="prompt-body">
+          <pre>
+Create a minimal, flat UI panel on a warm cream background that
+displays three vertically-stacked AI model-type selector cards.
 
-        <div class="stack">
-          <!-- Transcription -->
-          <div class="card">
-            <span class="card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="8" y="2" width="12" height="16" rx="2"/>
-                <rect x="4" y="6" width="12" height="16" rx="2" fill="#EDE4CC" stroke="currentColor"/>
-                <line x1="8"  y1="11" x2="13" y2="11"/>
-                <line x1="8"  y1="14" x2="13" y2="14"/>
-                <line x1="8"  y1="17" x2="11" y2="17"/>
-              </svg>
-            </span>
-            <span class="card__label">Transcription</span>
-          </div>
+── Canvas &amp; Frame ──────────────────────────────────────────────
+• Background color: #F2EBD9 (warm parchment / off-white cream)
+• The entire composition sits inside an invisible bounding box
+  ~780 px wide. At each corner of this bounding box place a small
+  filled square (14 × 14 px, border-radius 2 px) as anchor/corner
+  markers:
+    top-left     → #E04040  (coral red)
+    top-right    → #E87A20  (burnt orange)
+    bottom-left  → #6B2DB8  (violet / purple)
+    bottom-right → #D49020  (amber / gold)
 
-          <!-- Large language model -->
-          <div class="card card--featured">
-            <span class="card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9.5 2C7 2 5 4 5 6.5c0 .5.1 1 .2 1.4C3.9 8.5 3 9.9 3 11.5
-                         c0 1.8 1.1 3.3 2.7 3.9C5.9 18.4 7.5 20 9.5 20c.8 0 1.5-.2 2.1-.6
-                         .5.4 1.2.6 1.9.6 2 0 3.6-1.6 3.8-4.6
-                         C18.9 14.8 20 13.3 20 11.5c0-1.6-.9-3-2.2-3.6
-                         .2-.4.2-.9.2-1.4C18 4 16 2 13.5 2c-.9 0-1.8.3-2.5.8
-                         C10.4 2.3 9.9 2 9.5 2z"/>
-                <path d="M12 6v12M9 9c0 0 1.5 1.5 3 1.5S15 9 15 9
-                         M9 14c0 0 1.5-1 3-1s3 1 3 1"/>
-              </svg>
-            </span>
-            <span class="card__label">Large language model</span>
-          </div>
+── Card Stack ──────────────────────────────────────────────────
+Three horizontally-wide cards stacked with 20 px vertical gap.
+All cards share:
+  • Border-radius: 6 px
+  • Border: 1.5 px solid #DDD5C0
+  • Background: #F5EFE2 (very light warm beige)
+  • Content: centered icon + label side-by-side, icon 14 px to
+    the left of text
+  • Icon color: #5A5347 (warm dark gray)
+  • Label color: #4A4440 (deep warm gray)
+  • Font: Inter (or system sans-serif), semi-bold (600)
 
-          <!-- Text-to-speech -->
-          <div class="card">
-            <span class="card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="2" width="6" height="11" rx="3"/>
-                <path d="M5 10a7 7 0 0 0 14 0"/>
-                <line x1="12" y1="19" x2="12" y2="22"/>
-                <line x1="9"  y1="22" x2="15" y2="22"/>
-              </svg>
-            </span>
-            <span class="card__label">Text-to-speech</span>
-          </div>
+Card 1 — "Transcription"
+  • Padding: 28 px top/bottom, 40 px left/right
+  • Icon: double-document / clipboard (outline stroke 1.7)
+  • Label: 22 px / 600 weight
+
+Card 2 — "Large language model"  [FEATURED / middle]
+  • Padding: 36 px top/bottom, 40 px left/right  (taller than others)
+  • Background: #EDE4CC  (slightly darker warm beige — stands out)
+  • Border: 1.5 px solid #D8CDB4
+  • Icon: brain / neural outline (outline stroke 1.7), 32 px
+  • Label: 26 px / 600 weight  (slightly larger text)
+
+Card 3 — "Text-to-speech"
+  • Same spec as Card 1
+  • Icon: microphone outline (outline stroke 1.7)
+  • Label: 22 px / 600 weight
+
+── Typography ──────────────────────────────────────────────────
+Font family: Inter, Helvetica Neue, Arial, sans-serif
+Weights used: 600 (semi-bold) only
+Letter-spacing: -0.01 em for a tight, modern feel
+No subtext, captions, or secondary labels anywhere.
+
+── Visual Style ────────────────────────────────────────────────
+Flat design — no drop shadows, no gradients, no blur effects.
+Warm neutral monochromatic palette with tiny accent corner dots.
+The overall feel is an infographic-style "model type" picker,
+clean and minimal, suitable for a SaaS product marketing section.
+
+── Interactions (optional) ─────────────────────────────────────
+On card hover: lighten border to #C8BFA8, raise background to
+#EAE0CE. Transition: 150 ms ease. No scale or shadow transforms.
+          </pre>
         </div>
       </div>
     </div>
 
-    <!-- Right: prompt -->
-    <div class="prompt-pane">
-      <div class="prompt-pane__label">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-        </svg>
-        Reverse-engineered prompt
-        <button class="prompt-pane__copy" onclick="copyPrompt(this, 'prompt1')">Copy</button>
+    <!-- ── Entry 2 ── -->
+    <div class="entry">
+      <div class="preview">
+        <span class="entry-num">02 / 06</span>
+        <iframe src="img-2.html" title="Global Voice recreation" loading="lazy"></iframe>
       </div>
-      <div class="prompt-pane__body">
-        <pre id="prompt1">
-<span class="h">LAYOUT</span>
-Warm cream canvas (#F2EBD9). A single centered
-frame ~780 px wide containing three vertically-
-stacked card rows with 20 px vertical gaps.
+      <div class="prompt-pane">
+        <div class="prompt-header">
+          <h2>Global Voice</h2>
+          <span class="tag">Prompt</span>
+        </div>
+        <div class="prompt-body">
+          <pre>
+Create a minimal, flat illustration of a wireframe globe on a warm
+cream background, partially cropped at the bottom so only the top
+~56% of the sphere is visible.
 
-<span class="h">CORNER ANCHORS</span>
-Four small filled squares (14×14 px, radius 2 px)
-sit at the corners of the bounding box:
-  top-left     <span class="v">#E04040</span>  coral red
-  top-right    <span class="v">#E87A20</span>  burnt orange
-  bottom-left  <span class="v">#6B2DB8</span>  violet/purple
-  bottom-right <span class="v">#D49020</span>  amber/gold
+── Canvas ──────────────────────────────────────────────────────
+• Background colour: #F2EBD9 (warm parchment / off-white cream)
+• Canvas aspect ratio: ~1.84 : 1  (e.g. 900 × 490 px)
+• overflow: hidden on the container
 
-<span class="h">CARDS — shared spec</span>
-  Background   <span class="v">#F5EFE2</span>  (light warm beige)
-  Border       <span class="v">1.5px solid #DDD5C0</span>
-  Border-radius <span class="n">6px</span>
-  Padding      <span class="n">28px</span> top/bottom · <span class="n">40px</span> left/right
-  Content      icon + label, centered inline, <span class="n">14px</span> gap
-  Icon color   <span class="v">#5A5347</span>  (warm dark gray, outline stroke 1.7)
-  Label color  <span class="v">#4A4440</span>  (deep warm gray)
-  Font         Inter, semi-bold <span class="n">600</span>, <span class="n">22px</span>
-  Hover        bg → <span class="v">#EAE0CE</span>, border → <span class="v">#C8BFA8</span> (150ms ease)
+── Globe ───────────────────────────────────────────────────────
+• The globe is centered horizontally and positioned so its top arc
+  ("North Pole") appears ~4–6% from the top of the canvas.
+• The globe center is placed ~88–90% down the canvas height, causing
+  the lower ~44% of the sphere to be cropped by the frame.
+• Globe interior fill:   #EDE5CF  (warm beige, barely darker than bg)
+• Grid line colour:      #C8B690  (warm tan / aged parchment tone)
+• Grid line weight:      0.85 px
+• Globe outline circle:  #C2AF88, 0.9 px stroke
+• Projection: orthographic, viewing from the positive-X equatorial
+  direction, tilted ~6° above the equatorial plane.
 
-<span class="h">CARD 1 — Transcription</span>
-  Icon: two overlapping documents / clipboard
-  (rear rect offset +4px right +4px down, smaller)
+── Globe Grid ──────────────────────────────────────────────────
+• Latitude parallels every 10° from −80° to +80° (17 lines drawn;
+  ~9 visible within the canvas).
+  Each parallel is a true horizontal ellipse:
+    centre_y = globe_cy − R · sin(lat) · cos(elev)
+    rx = R · cos(lat)
+    ry = R · cos(lat) · sin(elev)
+• Longitude meridians every 18° (20 half-arcs = 10 great circles).
+  Drawn parametrically from S-pole to N-pole, 1° increments.
 
-<span class="h">CARD 2 — Large language model  [FEATURED]</span>
-  Background   <span class="v">#EDE4CC</span>  (slightly darker beige)
-  Border       <span class="v">#D8CDB4</span>
-  Padding      <span class="n">36px</span> top/bottom (taller than others)
-  Icon size    <span class="n">32px</span>  (brain / neural cluster outline)
-  Label size   <span class="n">26px</span>
+── Anchor Squares ──────────────────────────────────────────────
+Six small filled squares (13×13 px, border-radius 2px) placed at
+specific reference positions on the composition:
 
-<span class="h">CARD 3 — Text-to-speech</span>
-  Same spec as Card 1
-  Icon: microphone (capsule body + stand + base line)
+  coral red    #E04040  — top-center-left  (~35%, 27%)
+  burnt orange #E87A20  — top-center-right (~58%, 27%)
+  amber/gold   #D4A018  — mid-left         (~23%, 45%)
+  violet       #7B2FBE  — mid-right        (~71%, 45%)
+  electric blue #2B6DE8 — lower-left      (~24%, 91%)
+  emerald green #1BA830 — lower-right     (~76%, 91%)
 
-<span class="h">TYPOGRAPHY</span>
-  Font-family  Inter → Helvetica Neue → Arial, sans-serif
-  Weight       <span class="n">600</span> (semi-bold) throughout
-  Letter-spacing <span class="n">-0.01em</span>
+── Brand / Logo Mark ───────────────────────────────────────────
+• A single bold, condensed black letterform ("b" or brand glyph)
+  centered horizontally at approx. (50%, 61%) of the canvas.
+• Colour: #0e0e0e (near-black)
+• Font style: Impact or Arial Black, 900 weight, ~66px, line-height 0.88
+• No shadow, no outline — plain solid fill on the warm globe surface.
 
-<span class="h">VISUAL STYLE</span>
-  Fully flat — zero shadows, zero gradients.
-  Warm monochromatic palette, parchment tones.
-  Infographic / model-picker feel (SaaS marketing).
-  No secondary labels, badges, or decorative elements
-  other than the four corner anchor squares.</pre>
+── Colour Palette ──────────────────────────────────────────────
+Page background   #F2EBD9   Globe fill       #EDE5CF
+Grid lines        #C8B690   Globe outline    #C2AF88
+Logo mark         #0E0E0E   Anchor 1 (red)   #E04040
+Anchor 2 (orange) #E87A20   Anchor 3 (gold)  #D4A018
+Anchor 4 (violet) #7B2FBE   Anchor 5 (blue)  #2B6DE8
+Anchor 6 (green)  #1BA830
+
+── Visual Style ────────────────────────────────────────────────
+Flat / minimal illustration — zero drop shadows, zero gradients.
+Warm monochromatic palette with small multi-coloured accent dots.
+Globe evokes "global reach" or "international voice" concept.
+The cropped bottom creates a sense of scale and grandeur.
+          </pre>
+        </div>
       </div>
     </div>
+
+    <!-- ── Entry 3 ── -->
+    <div class="entry">
+      <div class="preview">
+        <span class="entry-num">03 / 06</span>
+        <iframe src="img-3.html" title="Workflow diagram recreation" loading="lazy"></iframe>
+      </div>
+      <div class="prompt-pane">
+        <div class="prompt-header">
+          <h2>Workflow Diagram</h2>
+          <span class="tag">Prompt</span>
+        </div>
+        <div class="prompt-body">
+          <pre>
+Create a minimalist flat editorial UI illustration on a 2516 × 1364 px
+artboard. The background is a warm ivory/cream color (#fbf7ea) with a
+very thin dark outer border (#25241f) and a subtle 6 px viewport corner
+radius.
+
+── Card Stack ──────────────────────────────────────────────────
+Stack four large horizontal process cards, each 1222 px wide and
+260 px high, aligned at x=631 px. Place them at y=226, 538, 851,
+and 1163 px so the lowest card is partially cropped by the bottom
+edge. Cards use:
+  • Fill: #fbf8ec (warm off-white)
+  • Border: 4 px solid #c4c0aa
+  • Border-radius: 5 px
+  • Shadow: very soft downward
+
+── Rail & Pipes ────────────────────────────────────────────────
+Behind the cards, add a vertical pale beige rail (#f1ecdc)
+at x=735 px, y=483 px, width 1017 px, height 783 px.
+
+Add thick routed connector lines:
+  Blue  #205dac — left side, curves top-left radius 118 px, 6 px stroke
+  Amber #f2a406 — drops from top, curves bottom-right corner 118 px
+  Red   #b50e17 — far right, curves bottom-left with 116 px radius
+  Olive #b58c2d — lower left, partial arc emerging from edge
+
+── Swatches (inside each card) ─────────────────────────────────
+Four small squares (50×50 px, gap 18 px) near upper-left of each
+card. Default: muted beige (#cec8b0 / #bcb7a0). One highlighted:
+  Card 1 → 2nd swatch: blue  #205dac (4 px radius)
+  Card 2 → 4th swatch: amber #f2a406
+  Card 3 → 1st swatch: red   #b50e17
+  Card 4 → 3rd swatch: blue  #205dac
+Beige swatches are perfectly square; colored swatches have 4 px radius.
+
+Each card has a muted beige bar (247×50 px) at lower-right,
+right 36 px, bottom 43 px. Top card bar at top 163 px instead.
+
+── Brand Mark ──────────────────────────────────────────────────
+On card 2, right side: "Bland®" wordmark
+  Font: Arial/Helvetica bold grotesk, 800 weight, 53 px
+  Color: #7d776c, tracking -2.5 px, superscript ® at 18 px
+
+── Visual Style ────────────────────────────────────────────────
+No gradients, no glass, no material shadows. Flat, geometric,
+diagrammatic. Oversized negative space, precision alignment, muted
+neutral palette, small saturated accent markers.
+Responsive: scale 2516×1364 artboard to fit viewport proportionally.
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Entry 4 ── -->
+    <div class="entry">
+      <div class="preview">
+        <span class="entry-num">04 / 06</span>
+        <iframe src="img-4.html" title="Isometric security layers recreation" loading="lazy"></iframe>
+      </div>
+      <div class="prompt-pane">
+        <div class="prompt-header">
+          <h2>Isometric Security Layers</h2>
+          <span class="tag">Prompt</span>
+        </div>
+        <div class="prompt-body">
+          <pre>
+Create a dramatic isometric illustration of four stacked floating
+cream-colored rhombus/diamond layers on a near-black background.
+
+── Canvas ──────────────────────────────────────────────────────
+• Background: #010201 (near-black)
+• Viewport border: 4 px solid #bdb99d
+• Aspect ratio: 2512 × 1360 px
+• Responsive scaling to fit viewport
+
+── Background Grid Lines ───────────────────────────────────────
+Four horizontal dashed lines across the full width:
+  y = 699, 889, 1080, 1271
+  Color: #f4f0d9  Stroke: 6 px  Dash: 18 on / 16 off  Opacity: 0.92
+
+── Four Isometric Layers (bottom to top) ───────────────────────
+Cream-colored rhombus panels stacked vertically with ~190 px gaps.
+All share:
+  • Fill: #fffbed  (warm cream)
+  • Stroke: #c8c6b5, 4 px
+  • Drop shadow: dy=18, stdDeviation=18, flood-color black, opacity .35
+
+Layer positions (polygon points for each):
+  Bottom:  525,1273  1256,850  1987,1273  1660,1462  852,1462
+  Layer 2: 525,1082  1256,659  1987,1082  1256,1318
+  Layer 3: 525,891   1256,468  1987,891   1256,1127
+  Top:     525,700   1256,274  1987,700   1256,1126
+
+── Edge Nodes (diamond markers) ────────────────────────────────
+At the left and right midpoints of each layer's horizontal datum,
+place small diamond/rhombus markers (cream fill, colored stroke 4 px):
+  Top layer (y≈699):    Purple  #8b20b5  — left & right
+  Layer 3 (y≈890):      Green   #0e9b60  — left & right
+  Layer 2 (y≈1081):     Amber   #f5a900  — left & right
+  Bottom (y≈1272):      Blue    #2364ad  — left & right
+Each diamond is ~17 px wide, 11 px tall.
+
+── Top Surface Illustration ────────────────────────────────────
+On the topmost layer surface, render a subtle abstract shape
+resembling a stylized map or land mass:
+  • Fill: #fff8d6, opacity 0.25
+  • Stroke: #b9b7a5, 4 px
+  • Two black filled shadow polygons overlapping it to suggest
+    depth/terrain
+
+── Visual Style ────────────────────────────────────────────────
+High drama: dark background vs. luminous cream layers.
+Dashed grid lines create a technical/blueprint feel.
+Colored edge nodes mark "security levels" or data tiers.
+Zero gradients except for the soft shadow filter.
+Clean isometric geometry — no perspective distortion.
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Entry 5 ── -->
+    <div class="entry">
+      <div class="preview">
+        <span class="entry-num">05 / 06</span>
+        <iframe src="img-5.html" title="Detect Transform Validate recreation" loading="lazy"></iframe>
+      </div>
+      <div class="prompt-pane">
+        <div class="prompt-header">
+          <h2>Detect · Transform · Validate</h2>
+          <span class="tag">Prompt</span>
+        </div>
+        <div class="prompt-body">
+          <pre>
+Create a pale purple security workflow illustration featuring
+concentric ellipse rings with labels and a central isometric data tile.
+
+── Canvas ──────────────────────────────────────────────────────
+• Background: #f6f4ff (very light lavender)
+• Aspect ratio: 3200 × 2261 px
+• Responsive scaling
+
+── Concentric Ellipses (centered at 1600, 1210) ────────────────
+Three ellipses, outermost to innermost:
+
+  Outer:  rx=1390, ry=780
+          stroke #a9a3c5, 3 px, opacity 0.62
+
+  Middle: rx=1130, ry=620
+          stroke #6b5fd0, 13 px, opacity 0.95
+
+  Inner:  rx=900, ry=480
+          stroke #4738ee, 18 px
+
+To create label gaps in the rings, add white mask rectangles and
+rounded-cap white strokes over the ellipses where text sits at
+the bottom center of each ring.
+
+── Typography Labels ────────────────────────────────────────────
+Three stacked labels centered horizontally:
+  "Validate"  — top:340px,  color #8f89ab, opacity 0.74, 82 px
+  "Transform" — top:448px,  color #70648f, 96 px
+  "Detect"    — top:614px,  color #17133d, 94 px
+Font: Arial/Helvetica. No other text.
+
+── Isometric Data Tile (center) ────────────────────────────────
+A 3D isometric rhombus tile positioned at roughly (970, 930),
+scaled to x1.02 horizontal, x0.62 vertical (squashed for iso view).
+Drop shadow: dy=34, stdDeviation=28, color #6a5acb, opacity 0.18.
+
+Top face: cream/white polygon
+  • Fill: #f7f4ff  • Stroke: #17133d, 5 px
+
+Left face (depth):
+  • Fill: #d5ccff  • Stroke: #17133d, 5 px
+
+Right face (depth):
+  • Fill: #c4b8fa  • Stroke: #17133d, 5 px
+
+Internal grid on top face:
+  Four small parallelogram cells, stroke #b7add8, 3 px, opacity 0.7
+  Horizontal connecting lines between cells.
+
+Highlight lines on top face (thick, stroke-linecap round):
+  Light lavender #c6bffc — 24 px stroke
+  Deep violet    #4537e7 — 24 px stroke (two lines)
+  Medium purple  #8b7feb — 24 px stroke
+  Pale           #d5d0fb / #c7c0f7 — 24 px stroke
+
+── Lock Icon ───────────────────────────────────────────────────
+At approx. (1552, 1602):
+  • Rectangle body: 96×94 px, rx=8, fill #bfb4ff, stroke #4936d9, 5 px
+  • Shackle arc: path rising ~23 px above the body
+  • Fill: none (shackle outline only)
+
+── Colour Palette ──────────────────────────────────────────────
+Background  #f6f4ff    Outer ring   #a9a3c5
+Middle ring #6b5fd0    Inner ring   #4738ee
+Tile top    #f7f4ff    Tile left    #d5ccff
+Tile right  #c4b8fa    Tile border  #17133d
+Lock fill   #bfb4ff    Lock stroke  #4936d9
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Entry 6 ── -->
+    <div class="entry">
+      <div class="preview">
+        <span class="entry-num">06 / 06</span>
+        <iframe src="img-6.html" title="Floating isometric data cards recreation" loading="lazy"></iframe>
+      </div>
+      <div class="prompt-pane">
+        <div class="prompt-header">
+          <h2>Floating Isometric Cards</h2>
+          <span class="tag">Prompt</span>
+        </div>
+        <div class="prompt-body">
+          <pre>
+Create a floating isometric card layout on a pale purple background,
+with four large rhombus tiles each featuring a unique internal pattern.
+
+── Canvas ──────────────────────────────────────────────────────
+• Background: #f4f2ff (soft lavender)
+• Aspect ratio: 3200 × 2261 px
+• Responsive scaling
+
+── Shared Tile Anatomy ─────────────────────────────────────────
+Each tile is a diamond (rhombus) with isometric depth sides:
+  Top face:    fill #f6f3ff
+  Left side:   fill #b8a8ff,  stroke #4b3bd8, 8 px, round joins
+  Right side:  fill #a999f2,  stroke #4b3bd8, 8 px, round joins
+  Top outline: stroke #4b3bd8, 8 px, round joins
+  Drop shadow: dy=34, stdDeviation=26, color #5e4ddb, opacity 0.22
+  Depth: 110–114 px
+
+── Four Tiles & Their Patterns ─────────────────────────────────
+
+Tile 1 — TOP CENTER  (x=1095, y=260, w=1420, h=660, depth=110)
+  Pattern: LINE PATTERN
+  ~21 horizontal parallel lines across the face, all clipped to tile.
+  Lines run from left-center-ish to upper-right. Spacing is even.
+  Top line: stroke #3a326c, 4.2 px, opacity 0.86
+  Other lines: stroke #aaa4c7, 3.1 px, opacity 0.56, round caps
+
+Tile 2 — LEFT MIDDLE  (x=245, y=730, w=1365, h=700, depth=112)
+  Pattern: PULSE / ECG PATTERN
+  Two jagged polylines resembling signal/heartbeat waveforms.
+  Both lines: stroke #4d3fd6, 4 px, round linejoin
+  Second line offset ~112 px left and ~70 px down from the first.
+
+Tile 3 — RIGHT MIDDLE  (x=1785, y=805, w=1385, h=700, depth=112)
+  Pattern: WAVE / ARC PATTERN
+  ~18 concentric curved arcs (bezier curves) radiating outward.
+  Stroke: #8e82df, 3 px
+  Opacity fades from ~0.42 (inner) to ~0.08 (outer)
+
+Tile 4 — BOTTOM CENTER  (x=948, y=1300, w=1370, h=705, depth=114)
+  Pattern: DOT / SUNFLOWER PATTERN
+  145 circles arranged in a Fibonacci/sunflower spiral (golden angle
+  2.399 radians). Radii vary: 7–23 px.
+  Primary dots: fill #a799ef, opacity 0.55
+  Accent dots (every 5th): fill #7564dd, opacity 0.82
+
+── Colour Palette ──────────────────────────────────────────────
+Background   #f4f2ff    Tile top face  #f6f3ff
+Left side    #b8a8ff    Right side     #a999f2
+Outline      #4b3bd8    Shadow color   #5e4ddb
+Line stroke  #aaa4c7    Pulse stroke   #4d3fd6
+Wave stroke  #8e82df    Dot primary    #a799ef
+Dot accent   #7564dd
+
+── Visual Style ────────────────────────────────────────────────
+Ethereal, geometric, data-visualization aesthetic.
+Each tile tells a different data story through its pattern.
+Tiles overlap slightly to create visual layering and depth.
+No text, no labels — purely visual/abstract.
+          </pre>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- ═══════ ENTRY 2 ══════════════════════════════════════════ -->
-  <div class="entry">
-    <div class="entry__header">
-      <span class="entry__index">02</span>
-      <span class="entry__title">Global Voice — Wireframe globe illustration</span>
-    </div>
-
-    <!-- Left: recreation -->
-    <div class="preview">
-      <div class="globe-scene">
-        <canvas id="globe2" width="560" height="310"></canvas>
-        <!-- Anchor squares (scaled from 900×490 original) -->
-        <span class="globe-anchor" style="background:#E04040; left:198px; top:83px;"></span>
-        <span class="globe-anchor" style="background:#E87A20; left:323px; top:83px;"></span>
-        <span class="globe-anchor" style="background:#D4A018; left:126px; top:138px;"></span>
-        <span class="globe-anchor" style="background:#7B2FBE; left:395px; top:138px;"></span>
-        <span class="globe-anchor" style="background:#2B6DE8; left:132px; top:278px;"></span>
-        <span class="globe-anchor" style="background:#1BA830; left:423px; top:278px;"></span>
-        <!-- Brand mark -->
-        <div class="globe-mark" style="left:280px; top:188px;">b</div>
-      </div>
-    </div>
-
-    <!-- Right: prompt -->
-    <div class="prompt-pane">
-      <div class="prompt-pane__label">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-        </svg>
-        Reverse-engineered prompt
-        <button class="prompt-pane__copy" onclick="copyPrompt(this, 'prompt2')">Copy</button>
-      </div>
-      <div class="prompt-pane__body">
-        <pre id="prompt2">
-<span class="h">CANVAS</span>
-Warm parchment background <span class="v">#F2EBD9</span>.
-Aspect ratio ~<span class="n">1.84</span>:<span class="n">1</span>  (e.g. <span class="n">900</span>×<span class="n">490</span> px).
-Container has overflow:hidden.
-
-<span class="h">GLOBE GEOMETRY</span>
-Orthographic projection, viewer at +X equatorial
-axis tilted <span class="n">6°</span> above the equatorial plane.
-  Globe radius R   <span class="n">416</span> px  (at 900 px wide)
-  Centre x         <span class="n">50%</span> of canvas
-  Centre y         <span class="n">~90%</span> of canvas height
-  → North Pole sits <span class="n">~4%</span> from top edge
-  → Lower <span class="n">~44%</span> of sphere is cropped by frame
-
-<span class="h">GLOBE FILL &amp; LINES</span>
-  Interior fill    <span class="v">#EDE5CF</span>  (barely-warm beige)
-  Grid lines       <span class="v">#C8B690</span>, <span class="n">0.85</span> px stroke
-  Outline circle   <span class="v">#C2AF88</span>, <span class="n">0.9</span> px stroke
-
-<span class="h">LATITUDE PARALLELS</span>
-Every <span class="n">10°</span> from −80° to +80° (<span class="n">17</span> drawn, ~<span class="n">9</span> visible).
-Each is a horizontal ellipse:
-  centre_y = cy − R·sin(lat)·cos(<span class="n">6°</span>)
-  rx = R·cos(lat)
-  ry = R·cos(lat)·sin(<span class="n">6°</span>)
-
-<span class="h">LONGITUDE MERIDIANS</span>
-Every <span class="n">18°</span> — <span class="n">20</span> half-arcs = <span class="n">10</span> great circles.
-Parametric, <span class="n">1°</span> increments from S-pole → N-pole.
-  sx = cx + R · cos(lat)·sin(lon)
-  sy = cy − R · [sin(lat)·cos(e) − cos(lat)·cos(lon)·sin(e)]
-
-<span class="h">ANCHOR SQUARES</span>
-Six filled squares (<span class="n">13</span>×<span class="n">13</span> px, radius <span class="n">2</span> px):
-  coral red     <span class="v">#E04040</span>  inner top-left  (~<span class="n">35</span>%, <span class="n">27</span>%)
-  burnt orange  <span class="v">#E87A20</span>  inner top-right (~<span class="n">58</span>%, <span class="n">27</span>%)
-  amber/gold    <span class="v">#D4A018</span>  mid-left        (~<span class="n">23</span>%, <span class="n">45</span>%)
-  violet        <span class="v">#7B2FBE</span>  mid-right       (~<span class="n">71</span>%, <span class="n">45</span>%)
-  electric blue <span class="v">#2B6DE8</span>  lower-left      (~<span class="n">24</span>%, <span class="n">91</span>%)
-  emerald green <span class="v">#1BA830</span>  lower-right     (~<span class="n">76</span>%, <span class="n">91</span>%)
-
-<span class="h">BRAND MARK</span>
-Bold condensed letterform centered at (<span class="n">50%</span>, <span class="n">61%</span>).
-  Font    Impact → Arial Black, weight <span class="n">900</span>
-  Size    <span class="n">~66</span> px  (at 900 px wide canvas)
-  Colour  <span class="v">#0E0E0E</span>  (near-black)
-
-<span class="h">COLOUR PALETTE</span>
-  Page bg    <span class="v">#F2EBD9</span>    Globe fill  <span class="v">#EDE5CF</span>
-  Grid lines <span class="v">#C8B690</span>    Outline     <span class="v">#C2AF88</span>
-  Logo mark  <span class="v">#0E0E0E</span>
-
-<span class="h">VISUAL STYLE</span>
-Flat, zero shadows, zero gradients.
-Warm monochromatic parchment palette.
-Globe evokes "global reach / international voice".
-Cropped bottom creates scale and grandeur.</pre>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    function copyPrompt(btn, id) {
-      const pre = document.getElementById(id);
-      const text = pre.innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.textContent = 'Copy';
-          btn.classList.remove('copied');
-        }, 2000);
-      });
-    }
-
-    // ── Globe 2 drawing ───────────────────────────────
-    (function () {
-      const canvas = document.getElementById('globe2');
-      const ctx = canvas.getContext('2d');
-      const W = 560, H = 310;
-      const cx = 280, cy = 274, R = 259;
-      const e = 6 * Math.PI / 180;
-      const cosEl = Math.cos(e), sinEl = Math.sin(e);
-
-      function project(lat, lon) {
-        const phi = lat * Math.PI / 180;
-        const lam = lon * Math.PI / 180;
-        const x3 = Math.cos(phi) * Math.cos(lam);
-        const y3 = Math.cos(phi) * Math.sin(lam);
-        const z3 = Math.sin(phi);
-        return {
-          x: cx + R * y3,
-          y: cy - R * (z3 * cosEl - x3 * sinEl)
-        };
-      }
-
-      // Background
-      ctx.fillStyle = '#F2EBD9';
-      ctx.fillRect(0, 0, W, H);
-
-      // Globe fill
-      ctx.beginPath();
-      ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.fillStyle = '#EDE5CF';
-      ctx.fill();
-
-      // Grid
-      ctx.strokeStyle = '#C8B690';
-      ctx.lineWidth = 0.85;
-
-      // Latitude parallels
-      for (let lat = -80; lat <= 80; lat += 10) {
-        const phi = lat * Math.PI / 180;
-        const centreY = cy - R * Math.sin(phi) * cosEl;
-        const rx = R * Math.cos(phi);
-        const ry = rx * sinEl;
-        if (rx < 2) continue;
-        ctx.beginPath();
-        ctx.ellipse(cx, centreY, rx, ry, 0, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
-      // Longitude meridians
-      for (let lon = 0; lon < 360; lon += 18) {
-        ctx.beginPath();
-        for (let lat = -90; lat <= 90; lat++) {
-          const { x, y } = project(lat, lon);
-          lat === -90 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
-
-      // Outline circle
-      ctx.beginPath();
-      ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.strokeStyle = '#C2AF88';
-      ctx.lineWidth = 0.9;
-      ctx.stroke();
-    })();
-  </script>
+  <footer>
+    <p>Image Recreation Gallery — 6 of 6</p>
+    <p>Reverse-engineered design prompts</p>
+  </footer>
 
 </body>
 </html>
