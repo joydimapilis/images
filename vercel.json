@@ -3,5 +3,6 @@
     { "source": "/", "destination": "/gallery.html" },
     { "source": "/gallery", "destination": "/gallery.html" },
     { "source": "/img-1", "destination": "/img-1.html" }
+    { "source": "/img-2", "destination": "/img-2.html" }
   ]
 }
