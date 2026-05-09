@@ -3,6 +3,10 @@
     { "source": "/", "destination": "/gallery.html" },
     { "source": "/gallery", "destination": "/gallery.html" },
     { "source": "/img-1", "destination": "/img-1.html" },
-    { "source": "/img-2", "destination": "/img-2.html" }
+    { "source": "/img-2", "destination": "/img-2.html" },
+    { "source": "/img-3", "destination": "/img-3.html" },
+    { "source": "/img-4", "destination": "/img-4.html" },
+    { "source": "/img-5", "destination": "/img-5.html" },
+    { "source": "/img-6", "destination": "/img-6.html" }
   ]
 }
